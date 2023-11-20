@@ -1,5 +1,6 @@
 const db = require("../config/database.js");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const getUserById = async (id) => {
   const [rows] = await db.query("SELECT * FROM users WHERE userId = ?", [id]);
@@ -7,18 +8,29 @@ const getUserById = async (id) => {
 };
 
 const getUserByUsernameAndPassword = async (username, password) => {
-  const [rows] = await db.query(
-    "SELECT * FROM users WHERE username = ? AND password = ?",
-    [username, password]
-  );
-  return rows[0];
+  const [rows] = await db.query("SELECT * FROM users WHERE username = ?", [
+    username,
+  ]);
+
+  const user = rows[0];
+
+  if (user) {
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      return user;
+    }
+  }
+
+  return null;
 };
 
 const createUser = async (username, password) => {
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await db.query(
       "INSERT INTO users (username, password) VALUES (?, ?)",
-      [username, password]
+      [username, hashedPassword]
     );
 
     const insertedId = result.insertId;
@@ -31,23 +43,8 @@ const createUser = async (username, password) => {
   }
 };
 
-const generateAccessToken = (user) => {
-  const payload = {
-    userId: user.userId,
-  };
-
-  const accessToken = jwt.sign(
-    payload,
-    "4afe6577-30db-4485-bbdf-cf80ae2f082a",
-    { expiresIn: "30d" }
-  );
-
-  return accessToken;
-};
-
 module.exports = {
   createUser,
   getUserById,
   getUserByUsernameAndPassword,
-  generateAccessToken,
 };

@@ -20,4 +20,18 @@ const getUserByToken = async (token) => {
   }
 };
 
-module.exports = { getUserByToken };
+const generateAccessToken = (user) => {
+  const payload = {
+    userId: user.userId,
+  };
+
+  const accessToken = jwt.sign(
+    payload,
+    "4afe6577-30db-4485-bbdf-cf80ae2f082a",
+    { expiresIn: "30d" }
+  );
+
+  return accessToken;
+};
+
+module.exports = { getUserByToken, generateAccessToken };

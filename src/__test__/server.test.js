@@ -1,10 +1,12 @@
 jest.mock("../config/database.js");
 jest.mock("../controller/userController.js");
+jest.mock("../controller/noteController.js");
 
 const db = require("../config/database.js");
 const { createApolloServer } = require("./const.js");
 
 const userController = require("../controller/userController.js");
+const noteController = require("../controller/noteController.js");
 const authentication = require("../../src/authentication.js");
 
 describe("generateAccessToken", () => {

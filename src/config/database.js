@@ -7,4 +7,9 @@ const db = mysql.createPool({
   database: "portfolio",
 });
 
+const mockAddNote = async (sql, values) => {
+  return { insertId: 1 };
+};
+
 module.exports = db;
+module.exports = { mockAddNote };

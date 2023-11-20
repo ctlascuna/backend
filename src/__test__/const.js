@@ -2,17 +2,17 @@ const express = require("express");
 
 const { ApolloServer } = require("apollo-server-express");
 
-const userTypeDefs = require("../type/typeDefs.js");
-const userResolver = require("../resolver/resolver.js");
-const { getUserByToken } = require("../../src/authentication.js");
+const typeDefs = require("../../src/type/typeDefs.js");
+const resolver = require("../../src/resolver/resolver.js");
+const authentication = require("../../src/authentication.js");
 
 const createApolloServer = async (listenOptions = { port: 4000 }) => {
   const server = new ApolloServer({
-    typeDefs: [userTypeDefs],
-    resolvers: [userResolver],
+    typeDefs: [typeDefs],
+    resolvers: [resolver],
     context: async ({ req }) => {
       const token = req.headers.authorization || "";
-      const user = await getUserByToken(token);
+      const user = await authentication.getUserByToken(token);
 
       return { user };
     },

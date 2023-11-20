@@ -1,11 +1,15 @@
 const db = require("../config/database.js");
-const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
 const pdf = require("html-pdf");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const { exec } = require("child_process");
+const { QuillDeltaToHtmlConverter } = require("quill-delta-to-html");
 
-const generatePdf = async (notes) => {
+const generateMyNotesPdf = async (userId) => {
+  const [notes] = await db.query("SELECT * FROM notes WHERE userId = ?", [
+    userId,
+  ]);
   let combinedHtmlContent = "";
 
   for (const note of notes) {
@@ -25,14 +29,15 @@ const generatePdf = async (notes) => {
   fs.writeFileSync(pdfFilePath, "");
   pdf
     .create(combinedHtmlContent, pdfOptions)
-    .toFile(pdfFilePath, (err, result) => {});
+    .toFile(pdfFilePath, (err, result) => {
+      exec(`open ${pdfFilePath}`);
+    });
 };
 
 const getNotesByUserId = async (userId) => {
   const [notes] = await db.query("SELECT * FROM notes WHERE userId = ?", [
     userId,
   ]);
-  generatePdf(notes);
   return notes;
 };
 
@@ -86,4 +91,9 @@ const deleteNoteById = async (noteId, userId) => {
   }
 };
 
-module.exports = { getNotesByUserId, addNote, deleteNoteById };
+module.exports = {
+  getNotesByUserId,
+  addNote,
+  deleteNoteById,
+  generateMyNotesPdf,
+};
